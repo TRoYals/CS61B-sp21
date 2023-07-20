@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author : Qixuan Fu
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -108,11 +108,12 @@ public class Model extends Observable {
      * */
     public boolean tilt(Side side) {
         boolean changed;
-        changed = false;
+
 
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        changed = moveMerge(side);
 
         checkGameOver();
         if (changed) {
@@ -120,6 +121,192 @@ public class Model extends Observable {
         }
         return changed;
     }
+      public boolean checkCannotMove(Side side){
+        if(side == Side.NORTH ){
+            for(int i=0;i<board.size();i++){
+                for(int j=board.size()-2;j>=0;j--){
+                    if(board.tile(i,j)!=null){
+                        if(board.tile(i,j+1)==null||board.tile(i,j+1).value()==board.tile(i,j).value()){
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        if(side == Side.SOUTH ){
+              for(int i=0;i<board.size();i++){
+                  for(int j=1;j<board.size();j++){
+                      if(board.tile(i,j)!=null){
+                          if(board.tile(i,j-1)==null||board.tile(i,j-1).value()==board.tile(i,j).value()){
+                              return false;
+                          }
+                      }
+                  }
+              }
+          }
+          if(side == Side.WEST ){
+              for(int i=0;i<board.size();i++){
+                  for(int j=1;j<board.size();j++){
+                      if(board.tile(j,i)!=null){
+                          if(board.tile(j-1,i)==null||board.tile(j-1,i).value()==board.tile(j,i).value()){
+                              return false;
+                          }
+                      }
+                  }
+              }
+          }
+          if(side == Side.EAST ){
+              for(int i=0;i<board.size();i++){
+                  for(int j= board.size()-2;j>=0;j--){
+                      if(board.tile(j,i)!=null){
+                          if(board.tile(j+1,i)==null||board.tile(j+1,i).value()==board.tile(j,i).value()){
+                              return false;
+                          }
+                      }
+                  }
+              }
+          }
+        return true;
+      }
+      public boolean moveMerge(Side side){
+          if (checkCannotMove(side)){return false;}
+          if (side == Side.NORTH) {
+              for (int i = 0; i < board.size(); i++) {
+                  int count = 0;
+                  for (int j = board.size() - 1; j >= 0; j--) {
+                      if (board.tile(i, j) != null) {
+                          Tile t = board.tile(i, j);
+                          int dest_y = j;
+                          for (int k = j + 1; k < board.size() - count; k++) {
+                              if (board.tile(i, k) != null && board.tile(i, k).value() == t.value()) {
+                                  this.score += board.tile(i, k).value() * 2;
+                                  count += 1;
+                              }
+                              if (board.tile(i, k) != null && board.tile(i, k).value() != t.value()) {
+                                  break;
+                              }
+                              dest_y = k;
+                          }
+                          if(dest_y!=j){
+                          board.move(i, dest_y, t);}
+                      }
+                  }
+              }
+          }
+          if (side == Side.SOUTH) {
+              for (int i = 0; i < board.size(); i++) {
+                  int count = 0;
+                  for (int j = 0; j < board.size(); j++) {
+                      if (board.tile(i, j) != null) {
+                          Tile t = board.tile(i, j);
+                          int dest_y = j;
+                          for (int k = j - 1; k >= count; k--) {
+                              if (board.tile(i, k) != null && board.tile(i, k).value() == t.value()) {
+                                  this.score += board.tile(i, k).value() * 2;
+                                  count += 1;
+                              }
+                              if (board.tile(i, k) != null && board.tile(i, k).value() != t.value()) {
+                                  break;
+                              }
+                              dest_y = k;
+                          }
+                          board.move(i, dest_y, t);
+                      }
+                  }
+              }
+          }
+          if (side == Side.EAST) {
+              for (int i = 0; i < board.size(); i++) {
+                  int count = 0;
+                  for (int j = board.size()-1; j>=0; j--) {
+                      if (board.tile(j, i) != null) {
+                          Tile t = board.tile(j, i);
+                          int dest_x = j;
+                          for (int k = j +1; k < board.size()-count; k++) {
+                              if (board.tile(k,i ) != null && board.tile(k, i).value() == t.value()) {
+                                  this.score += board.tile(k, i).value() * 2;
+                                  count += 1;
+                              }
+                              if (board.tile(k, i) != null && board.tile(k, i).value() != t.value()) {
+                                  break;
+                              }
+                              dest_x = k;
+                          }
+                          board.move( dest_x,i, t);
+                      }
+                  }
+              }
+          }
+          if (side == Side.WEST) {
+              for (int i = 0; i < board.size(); i++) {
+                  int count = 0;
+                  for (int j = 0; j < board.size(); j++) {
+                      if (board.tile(j, i) != null) {
+                          Tile t = board.tile(j, i);
+                          int dest_x = j;
+                          for (int k = j - 1; k >= count; k--) {
+                              if (board.tile(k,i ) != null && board.tile(k, i).value() == t.value()) {
+                                  this.score += board.tile(k, i).value() * 2;
+                                  count += 1;
+                              }
+                              if (board.tile(k, i) != null && board.tile(k, i).value() != t.value()) {
+                                  break;
+                              }
+                              dest_x = k;
+                          }
+                          if(dest_x!=j){
+                          board.move( dest_x,i, t);}
+                      }
+                  }
+              }
+          }
+        return true;
+      }
+
+//    public boolean mergeTilt(Side side){
+//        if(side == Side.NORTH){
+//            for(int i=0;i<board.size();i++){
+//                for(int j=board.size()-1;j>0;j--){
+//                    if(board.tile(i,j)!=null) {
+//                        Tile t = board.tile(i,j);
+//                        for (int k = j - 1; k > 0; k--) {
+//                            if (board.tile(i, k)!=null&&board.tile(i, j).value() == board.tile(i, k).value()) {
+//                                board.move(i,k,t );
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return true;
+//    }
+//
+//    /**
+//     * Help function for tilt method
+//     * delete empty space in the direction, first need to check if
+//     * there exists empty Space
+//     * @param side
+//     * @return
+//     */
+//    public boolean killEmptySpace(Side side){
+//
+////        if(!emptySpaceExists(board)){
+////            return false;
+////        }
+//        if(side == Side.NORTH){
+//            for(int i =0;i<board.size();i++) {
+//                for (int j = board.size()-1; j >=  0; j--) {
+//                    if (board.tile(i, j) != null) {
+//                        Tile t = board.tile(i, j);
+//                        for (int k = board.size()-1; k > j; k--) {
+//                            if (board.tile(i, k) == null) {
+//                                board.move(i, k, t);
+//                            }
+//                        }
+//                    }
+//                }
+//            }}
+//        return true;}
 
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
@@ -137,7 +324,13 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
+        for (int i=0;i<b.size();i++){
+            for (int j =0;j<b.size();j++){
+                if(b.tile(i,j)==null){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -147,8 +340,15 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+        for (int i =0;i<b.size();i++){
+            for(int j=0;j<b.size();j++){
+                if (b.tile(i,j) !=null && b.tile(i,j).value()==MAX_PIECE) {
+                    return true;
+                }
+            }
+        }
         return false;
+
     }
 
     /**
@@ -158,7 +358,28 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        for(int i = 0;i<=b.size()-1;i++){
+            for(int j=0;j<=b.size()-1;j++){
+                if(b.tile(i,j) == null){
+                    return true;
+                }
+            }
+        }
+        //test move upside down
+        for(int i = 0;i<=b.size()-1;i++){
+            for(int j=0;j<=b.size()-2;j++){
+                if(b.tile(i,j).value()==b.tile(i,j+1).value()){
+                    return true;
+                }
+            }
+        }
+        for (int i = 0;i<=b.size()-2;i++){
+            for(int j=0;j<b.size()-1;j++){
+                if(b.tile(i,j).value()==b.tile(i+1,j).value()){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
